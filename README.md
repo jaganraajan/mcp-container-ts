@@ -23,44 +23,75 @@ This is a quick start guide that provides the basic building blocks to set up a 
   <img src="./docs/ghcp-mcp-in-action.png" width="600" alt="MCP and GHCP in Action" />
 </p>
 
+## What is MCP?
+The Model Context Protocol (MCP) is a protocol that allows different AI models and tools to communicate with each other. It provides a standardized way for models to share information and collaborate on tasks. The MCP server acts as a bridge between different models and tools, allowing them to work together seamlessly.
+
 Below is the architecture diagram for a typical MCP server setup:
 
 
 ```mermaid
 flowchart TD
-    User[User]
-    Host["VS Code, Copilot, LlamaIndex, Langchain..."]
-    ClientSSE[MCP Client]
-    ServerSSE[MCP Server]
-    Tools[Tools]
-    LLM[Azure OpenAI / OpenAI / GitHub Models]
-    Postgres[(PostgreSQL)]
+    user(("fa:fa-users User"))
+    host["VS Code, Copilot, LlamaIndex, Langchain..."]
+    client[MCP SSE Client]
+    agent[Agent]
+    AzureOpenAI([Azure OpenAI])
+    GitHub([GitHub Models])
+    OpenAI([OpenAI])
+    server([MCP SSE Server])
+    tools["fa:fa-wrench Tools"]
+    db[(Postgres DB)]
 
-    User --> host 
-    subgraph host["MCP Host"]
-        Host h@-.- ClientSSE
-        Host i@-.- |LLM Provider| LLM
-        h@{ animate: true }
-        i@{ animate: true }
+    user --> hostGroup 
+    subgraph hostGroup["MCP Host"]
+        host -.- client & agent
     end
-    ClientSSE a@---> |"SSE Endpoint /sse"| server
-    a@{ animate: true }
-
-    subgraph server["ACA Container *"]
-        ServerSSE -.- Tools
-    end
-    style server fill:#9B77E8,color:#fff,stroke:#5EB4D8,stroke-width:2px
     
-    subgraph db["ACA Container *"]
-        Tools b@--> |CRUD| Postgres
-        b@{ animate: true }
+    agent -.- AzureOpenAI & GitHub & OpenAI
+    
+    client a@ ---> |"Server Sent Events"| container
+
+    subgraph container["ACA Container (*)"]
+      server -.- tools
+      tools -.- add_todo 
+      tools -.- list_todos
+      tools -.- complete_todo
+      tools -.- delete_todo
     end
-    style db fill:#9B77E8,color:#fff,stroke:#5EB4D8,stroke-width:2px
+
+    add_todo b@ --> db
+    list_todos c@--> db
+    complete_todo d@ --> db
+    delete_todo e@ --> db
+    
+    %% styles
+
+    classDef animate stroke-dasharray: 9,5,stroke-dashoffset: 900,animation: dash 25s linear infinite;
+
+    classDef highlight fill:#9B77E8,color:#fff,stroke:#5EB4D8,stroke-width:2px
+    
+    classDef dim fill:#f0f0f0,color:#000,stroke:gray,stroke-width:1px
+    
+    class a animate
+    class b animate
+    class c animate
+    class d animate
+    class e animate
+
+    class hostGroup dim
+    class host dim
+    class client dim
+    class agent dim
+    class GitHub dim
+    class AzureOpenAI dim
+    class OpenAI dim
+    class container highlight
+
 
 ```
 
-> [!NOTE]
-> (*) This guide implements only the MCP server and Postgres database. The MCP host and clients are not provided. If you are looking for a complete solution, please check out this other [repository](https://github.com/manekinekko/azure-container-apps-ai-mcp).
+> [!IMPORTANT]
+> (*) This guide implements only the MCP server and Postgres database. The MCP host and clients are not provided. If you are looking for a complete solution, with an MCP host, client and both HTTP and SSE MCP servers please check out this other [repository](https://github.com/manekinekko/azure-container-apps-ai-mcp).
 
 ## Getting Started
 
