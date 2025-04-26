@@ -99,8 +99,8 @@ To get started with this project, follow the steps below:
 
 ## Prerequisites
 
-- Node.js (version 23 or higher) and npm 
-- Docker (recommended for running the MCP servers, and Postgres in Docker)
+- [Node.js](https://nodejs.org/en/download/) (version 23 or higher) and npm 
+- [Docker](https://docs.docker.com/get-started/get-docker/) (recommended for running the MCP servers, and Postgres in Docker)
 
 ## Prepare your local environment
 
@@ -111,7 +111,8 @@ docker compose up -d --build 'postgres'
 ```
 
 This will create a Docker container with Postgres running on port 5432. The MCP server will connect to this database to store the TODO items.
-You should see the following output:
+
+Once the container is created and started, you should see the following output:
 
 ```bash
 [+] Running 2/2
@@ -134,11 +135,11 @@ npm install
 npm start
 ```
 
-## Use the local MCP server from within a host
+## Use the local MCP server from within a desktop MCP Client
 
-### Option 1 - Use the mcp.json file
+### Option 1 - Use the mcp.json file in VS Code
 
-You can use the provided [mcp.json](.vscode/mcp.json) configuration file to set up the MCP server in your VS Code environment. This configuration file contains the necessary settings for the MCP server, including the URL and transport type.
+The quickest way to connect to the MCP server is the use the provided [mcp.json](.vscode/mcp.json) configuration file to set up the MCP server in your VS Code environment. This configuration file contains the necessary settings for the MCP server, including the URL and transport type.
 ```json
 {
   "servers": {
@@ -150,10 +151,10 @@ You can use the provided [mcp.json](.vscode/mcp.json) configuration file to set 
 }
 ```
 
-Once you have this file open, you can click on the "start" button that will connect the MCP server and fetch the available tools. You can also see the logs output in the terminal from the MCP server.
+Once you have this file opened, you can click on the "start" inlined action button that will connect the MCP server and fetch the available tools.
 
 
-### Option 2 - Manually Adding MCP Server to your host
+### Option 2 - Manually Adding MCP Server to VS Code
 
 1. Add MCP Server from command palette and add URL to your running Function app's SSE endpoint:
 
@@ -168,15 +169,15 @@ http://localhost:3000/sse
 6. In Copilot chat agent mode enter a prompt to trigger the tool, e.g., select some code and enter this prompt
 
 ```bash
-Add water to my grocery list
+I need to send an email to Dan, please add that to my todo list.
 ```
-7. When prompted to run the tool, consent by clicking Continue
+7. When prompted to run the tool, consent by clicking Continue,
 8. When you're done, press Ctrl+C in the terminal window to stop the func.exe host process, and List MCP Servers from command palette and stop the local server.
 
 
 ### Option 3 - MCP Inspector
 
-1. In a new terminal window, install and run MCP Inspector
+1. In a new terminal window, install and run [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)
 
 ```bash
 npx -y @modelcontextprotocol/inspector@latest node build/index.js
@@ -190,10 +191,10 @@ http://localhost:3000/sse
 ```
 5. List Tools. Click on a tool and Run Tool.
 
-## Deploy to Azure for Remote MCP
+## Deploy to Azure Container Apps
 
 TODO
 
 ## Next Steps
 
-- Learn more about related MCP efforts from Microsoft
+- Learn more about [related MCP efforts from Microsoft](https://github.com/microsoft/mcp)
