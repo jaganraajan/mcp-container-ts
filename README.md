@@ -17,7 +17,7 @@ urlFragment: mcp-container-ts
 -->
 # Getting Started with Remote MCP Servers using Azure Container Apps (Node.js/TypeScript)
 
-This is a quick start guide to help you set up and host a remote MCP server using Azure Container Apps with Node.js and TypeScript.
+This is a quick start guide that provides the basic building blocks to set up a remote Model Context Protocol (MCP) server using Azure Container Apps. The MCP server is built using Node.js and TypeScript, and it can be used to run various tools and services in a serverless environment.
 
 <p align="center">
   <img src="./docs/ghcp-mcp-in-action.png" width="600" alt="MCP and GHCP in Action" />
@@ -29,7 +29,7 @@ Below is the architecture diagram for a typical MCP server setup:
 ```mermaid
 flowchart TD
     User[User]
-    Host["VS Code, GHCP..."]
+    Host["VS Code, Copilot, LlamaIndex, Langchain..."]
     ClientSSE[MCP Client]
     ServerSSE[MCP Server]
     Tools[Tools]
@@ -38,24 +38,29 @@ flowchart TD
 
     User --> host 
     subgraph host["MCP Host"]
-        Host -.-> ClientSSE
-        Host <-.-> |LLM Provider| LLM
+        Host h@-.- ClientSSE
+        Host i@-.- |LLM Provider| LLM
+        h@{ animate: true }
+        i@{ animate: true }
     end
     ClientSSE a@---> |"SSE Endpoint /sse"| server
     a@{ animate: true }
 
-    subgraph server["ACA Container"]
+    subgraph server["ACA Container *"]
         ServerSSE -.- Tools
     end
     style server fill:#9B77E8,color:#fff,stroke:#5EB4D8,stroke-width:2px
     
-    subgraph db["ACA Container"]
+    subgraph db["ACA Container *"]
         Tools b@--> |CRUD| Postgres
         b@{ animate: true }
     end
     style db fill:#9B77E8,color:#fff,stroke:#5EB4D8,stroke-width:2px
 
 ```
+
+> [!NOTE]
+> (*) This guide implements only the MCP server and Postgres database. The MCP host and clients are not provided. If you are looking for a complete solution, please check out this other [repository](https://github.com/manekinekko/azure-container-apps-ai-mcp).
 
 ## Getting Started
 
