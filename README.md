@@ -180,7 +180,7 @@ I need to send an email to Dan, please add that to my todo list.
 1. In a new terminal window, install and run [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)
 
 ```bash
-npx -y @modelcontextprotocol/inspector@latest node build/index.js
+npm run inspect
 ```
 
 2. CTRL click to load the MCP Inspector web app from the URL displayed by the app (e.g. http://0.0.0.0:5173/#resources)
