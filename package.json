@@ -17,6 +17,7 @@
   "license": "MIT",
   "description": "An MCP server that implements SSE and communicates with a Postgres database.",
   "dependencies": {
+    "@azure/identity": "^4.9.1",
     "@modelcontextprotocol/sdk": "^1.10.2",
     "chalk": "^5.4.1",
     "debug": "^4.4.0",
