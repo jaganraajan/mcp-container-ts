@@ -193,7 +193,7 @@ http://localhost:3000/sse
 
 ## Deploy to Azure Container Apps
 
-TODO
+See [PR](https://github.com/Azure-Samples/mcp-container-ts/pull/2)
 
 ## Next Steps
 
