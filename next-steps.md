@@ -20,13 +20,6 @@ To troubleshoot any issues, see [troubleshooting](#troubleshooting).
 Environment variables can be configured by modifying the `env` settings in [resources.bicep](./infra/resources.bicep).
 To define a secret, add the variable as a `secretRef` pointing to a `secrets` entry or a stored KeyVault secret.
 
-#### Database connections for `mcp-container-ts`
-
-The following environment variables are set for `mcp-container-ts` in [resources.bicep](./infra/resources.bicep).
-They allow connection to the database instances, and can be modified or adapted to your service's needs:
-
-- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DATABASE`, `POSTGRES_USERNAME`, `POSTGRES_PASSWORD`.
-
 ### Configure CI/CD pipeline
 
 Run `azd pipeline config` to configure the deployment pipeline to connect securely to Azure. 
@@ -54,7 +47,6 @@ This includes:
 
 
 - Azure Container App to host the 'mcp-container-ts' service.
-- Azure Postgres Flexible Server to host the 'todos' database.
 
 More information about [Bicep](https://aka.ms/bicep) language.
 
