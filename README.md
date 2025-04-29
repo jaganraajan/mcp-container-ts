@@ -99,7 +99,6 @@ The quickest way to get started is GitHub Codespaces, since it will setup all th
 
 ### GitHub Codespaces
 
-
 You can run this template virtually by using GitHub Codespaces. The button will open a web-based VS Code instance in your browser:
 
 1. Open the template (this may take several minutes):
@@ -119,6 +118,11 @@ A related option is VS Code Dev Containers, which will open the project in your 
     [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Azure-Samples/mcp-container-ts)
 
 3. Open a terminal window
+4. Start the server
+
+```bash
+npm start
+```
 
 ### Local Environment
 
@@ -155,7 +159,7 @@ npm start
 > [!NOTE]
 > When the applications starts, the server will create an [in-memory SQLite](https://www.sqlite.org/inmemorydb.html) database. This database is used to store the state of the tools and their interactions with the MCP server.
 
-## Use the local MCP server with desktop MCP Clients
+## Test your MCP server with desktop MCP Clients
 
 ### Option 1 - Use the mcp.json file in VS Code
 
