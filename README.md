@@ -19,9 +19,56 @@ urlFragment: mcp-container-ts
 
 This is a quick start guide that provides the basic building blocks to set up a remote Model Context Protocol (MCP) server using Azure Container Apps. The MCP server is built using Node.js and TypeScript, and it can be used to run various tools and services in a serverless environment.
 
+## Prerequisites
+1. Install [VS Code](https://code.visualstudio.com/)
+2. Install [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) and [GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) extensions
+3. Install the [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd) (azd)
+
+## Setup Instructions
+You can run these commands from the VSCode Terminal 
+1. Clone this repository
+```cmd
+git clone https://github.com/azure-samples/mcp-container-ts.git
+```
+2. Log in to your Azure account
+```cmd
+azd auth login
+```
+3. Provision and deploy the project (ensure you are in the folder of the cloned repo when running this command):
+```cmd 
+azd up
+```
+4. Once the deployment is complete, you can access the MCP server using the URL provided in the output. The URL will look something like this:
+```cmd
+https://<env-name>.<container-id>.<region>.azurecontainerapps.io
+```
+5. You can configure the MCP server in your local VS Code environment by adding the URL to the `mcp.json` file or manually adding it as described in the previous section:
+```json
+{
+  "servers": {
+    "mcp-server-sse-remote": {
+      "type": "sse",
+      "url": "https://<your-app-name>.<region>.azurecontainerapps.io/sse"
+    }
+  }
+}
+```
+
+> [!NOTE]
+> The URL for the MCP server will be different for each deployment. Make sure to update the URL in the `mcp.json` file or in your MCP client configuration accordingly.
+ 
+6. If everything is configured correcly, you should see something like the below when prompting GitHub Copilot in Agent mode:
+  
 <p align="center">
   <img src="./docs/ghcp-mcp-in-action.png" width="600" alt="MCP and GHCP in Action" />
 </p>
+
+8. If you were simply testing the deployment, you can remove and clean up all deployed resources by running the following command to avoid incurring any costs:
+
+```bash
+azd down
+```
+
 
 ## What is MCP?
 The Model Context Protocol (MCP) is a protocol that allows different AI models and tools to communicate with each other. It provides a standardized way for models to share information and collaborate on tasks. The MCP server acts as a bridge between different models and tools, allowing them to work together seamlessly.
@@ -92,13 +139,11 @@ flowchart TD
 > [!IMPORTANT]
 > (*) This guide implements only the SSE MCP server. The MCP host and clients are not provided. If you are looking for a complete solution, with a custom MCP host, client and both HTTP and SSE MCP servers please check out this other [repository](https://github.com/manekinekko/azure-container-apps-ai-mcp).
 
-## Getting started
+## Other installation options
 
-You have a few options for getting started with this template.
-The quickest way to get started is GitHub Codespaces, since it will setup all the tools for you, but you can also [set it up locally](#local-environment).
+You have a few other options besides azd up locally for getting started with this template. The quickest way to get started is GitHub Codespaces, since it will setup all the tools for you, but you can also [set it up locally](#local-environment).
 
 ### GitHub Codespaces
-
 You can run this template virtually by using GitHub Codespaces. The button will open a web-based VS Code instance in your browser:
 
 1. Open the template (this may take several minutes):
@@ -215,51 +260,6 @@ npm run inspect
 http://localhost:3000/sse
 ```
 5. List Tools. Click on a tool and Run Tool.
-
-## Deploy to Azure Container Apps
-
-1. Install the [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd) (azd)
-
- 
-2. Log in to your Azure account
-
-```bash
-azd auth login
-```
-
-3. Provision and deploy the project:
-  
-```bash 
-azd up
-```
-4. Once the deployment is complete, you can access the MCP server using the URL provided in the output. The URL will look something like this:
-
-```bash
-https://<env-name>.<container-id>.<region>.azurecontainerapps.io
-```
-
-5. You can configure the MCP server in your local VS Code environment by adding the URL to the `mcp.json` file or manually adding it as described in the previous section:
-
-```json
-{
-  "servers": {
-    "mcp-server-sse-remote": {
-      "type": "sse",
-      "url": "https://<your-app-name>.<region>.azurecontainerapps.io/sse"
-    }
-  }
-}
-```
-
-> [!NOTE]
-> The URL for the MCP server will be different for each deployment. Make sure to update the URL in the `mcp.json` file or in your MCP client configuration accordingly.
- 
-
-6. If you were simply testing the deployment, you can remove and clean up all deployed resources by running the following command to avoid incurring any costs:
-
-```bash
-azd down
-```
 
 ## Next Steps
 
