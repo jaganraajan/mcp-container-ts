@@ -60,7 +60,7 @@ https://<env-name>.<container-id>.<region>.azurecontainerapps.io
 6. If everything is configured correcly, you should see something like the below when prompting GitHub Copilot in Agent mode:
   
 <p align="center">
-  <img src="./docs/ghcp-todo-mcp.png" width="600" alt="MCP and GHCP in Action" />
+  <img src="./docs/ghcp-mcp-in-action.png" width="600" alt="MCP and GHCP in Action" />
 </p>
 
 8. If you were simply testing the deployment, you can remove and clean up all deployed resources by running the following command to avoid incurring any costs:
