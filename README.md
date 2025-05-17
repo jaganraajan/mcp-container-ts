@@ -9,7 +9,7 @@ languages:
 - bicep
 - azdeveloper
 products:
-- container-apps
+- azure-container-apps
 - azure
 page_type: sample
 urlFragment: mcp-container-ts
