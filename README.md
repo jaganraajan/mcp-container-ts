@@ -59,9 +59,8 @@ https://<env-name>.<container-id>.<region>.azurecontainerapps.io
  
 6. If everything is configured correcly, you should see something like the below when prompting GitHub Copilot in Agent mode:
   
-<p align="center">
-  <img src="./docs/ghcp-mcp-in-action.png" width="600" alt="MCP and GHCP in Action" />
-</p>
+<!-- Centered image for visual emphasis -->
+![MCP and GHCP in Action](./docs/ghcp-mcp-in-action.png)
 
 8. If you were simply testing the deployment, you can remove and clean up all deployed resources by running the following command to avoid incurring any costs:
 
@@ -75,66 +74,11 @@ The Model Context Protocol (MCP) is a protocol that allows different AI models a
 
 Below is the architecture diagram for a typical MCP server setup:
 
+<!-- Centered image for visual emphasis -->
+![MCP ACA Architecture](./docs/mcp-container-arch.png)
 
-```mermaid
-flowchart TD
-    user(("fa:fa-users User"))
-    host["VS Code, Copilot, LlamaIndex, Langchain..."]
-    client[MCP SSE Client]
-    agent[Agent]
-    AzureOpenAI([Azure OpenAI])
-    GitHub([GitHub Models])
-    OpenAI([OpenAI])
-    server([MCP SSE Server])
-    tools["fa:fa-wrench Tools"]
-    db[(Sqlite DB)]
 
-    user --> hostGroup 
-    subgraph hostGroup["MCP Host"]
-        host -.- client & agent
-    end
-    
-    agent -.- AzureOpenAI & GitHub & OpenAI
-    
-    client a@ ---> |"Server Sent Events"| container
 
-    subgraph container["ACA Container (*)"]
-      server -.- tools
-      tools -.- add_todo 
-      tools -.- list_todos
-      tools -.- complete_todo
-      tools -.- delete_todo
-    end
-
-    add_todo b@ --> db
-    list_todos c@--> db
-    complete_todo d@ --> db
-    delete_todo e@ --> db
-    
-    %% styles
-
-    classDef animate stroke-dasharray: 9,5,stroke-dashoffset: 900,animation: dash 25s linear infinite;
-
-    classDef highlight fill:#9B77E8,color:#fff,stroke:#5EB4D8,stroke-width:2px
-    
-    classDef dim fill:#f0f0f0,color:#000,stroke:gray,stroke-width:1px
-    
-    class a animate
-    class b animate
-    class c animate
-    class d animate
-    class e animate
-
-    class hostGroup dim
-    class host dim
-    class client dim
-    class agent dim
-    class GitHub dim
-    class AzureOpenAI dim
-    class OpenAI dim
-    class container highlight
-
-```
 
 > [!IMPORTANT]
 > (*) This guide implements only the SSE MCP server. The MCP host and clients are not provided. If you are looking for a complete solution, with a custom MCP host, client and both HTTP and SSE MCP servers please check out this other [repository](https://github.com/manekinekko/azure-container-apps-ai-mcp).
