@@ -97,6 +97,10 @@ You can run this template virtually by using GitHub Codespaces. The button will 
 2. Open a terminal window
 3. Continue with the [deploying steps](#deploying)
 
+> [!NOTE]
+> If you run the mcp server inside of GitHub Codespaces, make sure to change the port visibility to Public:
+> Click on "PORTS" tabs → right-click on the opened port (3000 by default) → Port visibility → Public.
+
 ### VS Code Dev Containers
 
 A related option is VS Code Dev Containers, which will open the project in your local VS Code using the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers):
