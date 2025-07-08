@@ -26,36 +26,52 @@ This is a quick start guide that provides the basic building blocks to set up a 
 
 ## Setup Instructions
 You can run these commands from the VSCode Terminal 
+
 1. Clone this repository
+
 ```cmd
 git clone https://github.com/azure-samples/mcp-container-ts.git
 ```
+
 2. Log in to your Azure account
+
 ```cmd
 azd auth login
 ```
+
+For GitHub Codespaces users, if the previous command fails, try:
+
+```cmd
+azd auth login --use-device-code
+```
+
 3. Provision and deploy the project (ensure you are in the folder of the cloned repo when running this command):
+
 ```cmd 
 azd up
 ```
+
 4. Once the deployment is complete, you can access the MCP server using the URL provided in the output. The URL will look something like this:
+
 ```cmd
 https://<env-name>.<container-id>.<region>.azurecontainerapps.io
 ```
-5. You can configure the MCP server in your local VS Code environment by adding the URL to the `mcp.json` file or manually adding it as described in the previous section:
+
+5. You can configure the MCP server in your local VS Code environment by adding the URL to the `.vscode/mcp.json` file:
+
 ```json
 {
   "servers": {
     "mcp-server-sse-remote": {
       "type": "sse",
-      "url": "https://<your-app-name>.<region>.azurecontainerapps.io/sse"
+      "url": "https://<env-name>.<container-id>.<region>.azurecontainerapps.io/sse"
     }
   }
 }
 ```
 
 > [!NOTE]
-> The URL for the MCP server will be different for each deployment. Make sure to update the URL in the `mcp.json` file or in your MCP client configuration accordingly.
+> The URL for the MCP server will be different for each deployment. Make sure to update the URL in the `.vscode/mcp.json` file or in your MCP client configuration accordingly.
  
 6. If everything is configured correcly, you should see something like the below when prompting GitHub Copilot in Agent mode:
   
@@ -199,7 +215,7 @@ http://localhost:3000/sse
 
 For Azure Container Apps, the URL will be:
 ```bash
-https://<your-app-name>.<region>.azurecontainerapps.io/sse
+https://<env-name>.<container-id>.<region>.azurecontainerapps.io/sse
 ```
 
 2. Select HTTP (Server-Sent-Events) for the type of MCP server to add.
