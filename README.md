@@ -245,6 +245,12 @@ http://localhost:3000/sse
 azd auth login
 ```
 
+For GitHub Codespaces users, if the previous command fails, try:
+
+```bash
+azd auth login --use-device-code
+```
+
 3. Provision and deploy the project:
   
 ```bash 
