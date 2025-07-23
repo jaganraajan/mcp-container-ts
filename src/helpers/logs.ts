@@ -1,7 +1,12 @@
 import chalk, { ChalkInstance } from 'chalk';
 import debug from 'debug';
 
-debug.enable('mcp:*'); // Enable all debug logs
+const isDevelopment = process.env.NODE_ENV === 'development';
+const REDACTED = '<REDACTED>';
+const debugNamespace = process.env.DEBUG || (isDevelopment ? 'mcp:*' : '');
+if (debugNamespace) {
+  debug.enable(debugNamespace);
+}
 
 export const logger = (namespace: string) => {
   const dbg = debug('mcp:' + namespace);
@@ -18,16 +23,28 @@ export const logger = (namespace: string) => {
 
   return {
     info(...args: any[]) {
-      log(chalk.cyan, ...args);
+      if (isDevelopment) {
+        return log(chalk.cyan, ...args);
+      }
+      log(chalk.cyan, args[0], ...args.slice(1).map(_ => REDACTED));
     },
     success(...args: any[]) {
-      log(chalk.green, ...args);
+      if (isDevelopment) {
+        return log(chalk.green, ...args);
+      }
+      log(chalk.green, args[0], ...args.slice(1).map(_ => REDACTED));
     },
     warn(...args: any[]) {
-      log(chalk.yellow, ...args);
+      if (isDevelopment) {
+        return log(chalk.yellow, ...args);
+      }
+      log(chalk.yellow, args[0], ...args.slice(1).map(_ => REDACTED));
     },
     error(...args: any[]) {
-      log(chalk.red, ...args);
+      if (isDevelopment) {
+        return log(chalk.red, ...args);
+      }
+      log(chalk.red, args[0], ...args.slice(1).map(_ => REDACTED));
     },
   };
 };

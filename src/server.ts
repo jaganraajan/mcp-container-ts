@@ -12,6 +12,7 @@ import { Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
 import { logger } from './helpers/logs.js';
 import { TodoTools } from './tools.js';
+import { AuthenticatedUser, hasPermission, Permission } from './auth/authorization.js';
 
 const log = logger('server');
 const JSON_RPC = '2.0';
@@ -19,10 +20,23 @@ const JSON_RPC_ERROR = -32603;
 
 export class StreamableHTTPServer {
   server: Server;
+  private currentUser: AuthenticatedUser | null = null;
 
   constructor(server: Server) {
     this.server = server;
     this.setupServerRequestHandlers();
+  }
+
+  private getToolRequiredPermissions(toolName: string): Permission[] {
+    const toolPermissions: Record<string, Permission[]> = {
+      'add_todo': [Permission.CREATE_TODOS],
+      'list_todos': [Permission.READ_TODOS],
+      'complete_todo': [Permission.UPDATE_TODOS],
+      'delete_todo': [Permission.DELETE_TODOS],
+      'updateTodoText': [Permission.UPDATE_TODOS]
+    };
+    
+    return toolPermissions[toolName] || [];
   }
 
   async close() {
@@ -38,6 +52,10 @@ export class StreamableHTTPServer {
 
   async handlePostRequest(req: Request, res: Response) {
     log.info(`POST ${req.originalUrl} (${req.ip}) - payload:`, req.body);
+    
+    // Extract user from request (set by authentication middleware)
+    this.currentUser = (req as any).user as AuthenticatedUser;
+    
     try {
       const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
@@ -53,6 +71,7 @@ export class StreamableHTTPServer {
         log.success('Request closed by client');
         transport.close();
         this.server.close();
+        this.currentUser = null; // Clear user after request
       });
 
       await this.sendMessages(transport);
@@ -71,28 +90,62 @@ export class StreamableHTTPServer {
   }
 
   private setupServerRequestHandlers() {
-    this.server.setRequestHandler(ListToolsRequestSchema, async (_request) => {
+    this.server.setRequestHandler(ListToolsRequestSchema, async (request) => {
+      const user = this.currentUser;
+      
+      // Check if user has permission to list tools
+      if (!user || !hasPermission(user, Permission.LIST_TOOLS)) {
+        log.warn(`User ${user?.id || 'unknown'} denied permission to list tools`);
+        return this.createRPCErrorResponse('Insufficient permissions to list tools');
+      }
+
+      // Filter tools based on user permissions
+      const allowedTools = TodoTools.filter(tool => {
+        const requiredPermissions = this.getToolRequiredPermissions(tool.name);
+        return requiredPermissions.some((permission: Permission) => hasPermission(user, permission));
+      });
+
+      log.info(`User ${user.id} listed ${allowedTools.length} available tools`);
       return {
         jsonrpc: JSON_RPC,
-        tools: TodoTools,
+        tools: allowedTools,
       };
     });
+
     this.server.setRequestHandler(
       CallToolRequestSchema,
-      async (request, _extra) => {
+      async (request) => {
         const args = request.params.arguments;
         const toolName = request.params.name;
+        const user = this.currentUser;
         const tool = TodoTools.find((tool) => tool.name === toolName);
 
-        log.info(`Handling CallToolRequest for tool: ${toolName}`);
+        log.info(`User ${user?.id || 'unknown'} attempting to call tool: ${toolName}`);
+
+        if (!user) {
+          log.warn(`Unauthenticated user attempted to call tool: ${toolName}`);
+          return this.createRPCErrorResponse('Authentication required');
+        }
 
         if (!tool) {
           log.error(`Tool ${toolName} not found.`);
           return this.createRPCErrorResponse(`Tool ${toolName} not found.`);
         }
+
+        // Check tool-specific permissions
+        const requiredPermissions = this.getToolRequiredPermissions(toolName);
+        const hasRequiredPermission = requiredPermissions.some((permission: Permission) => 
+          hasPermission(user, permission)
+        );
+
+        if (!hasRequiredPermission) {
+          log.warn(`User ${user.id} denied permission to call tool: ${toolName}`);
+          return this.createRPCErrorResponse(`Insufficient permissions to call tool: ${toolName}`);
+        }
+
         try {
           const result = await tool.execute(args as any);
-          log.success(`Tool ${toolName} executed. Result:`, result);
+          log.success(`User ${user.id} successfully executed tool ${toolName}. Result:`, result);
           return {
             jsonrpc: JSON_RPC,
             content: [
@@ -104,9 +157,8 @@ export class StreamableHTTPServer {
               },
             ],
           };
-        }
-        catch (error) {
-          log.error(`Error executing tool ${toolName}:`, error);
+        } catch (error) {
+          log.error(`Error executing tool ${toolName} for user ${user.id}:`, error);
           return this.createRPCErrorResponse(
             `Error executing tool ${toolName}: ${error}`
           );

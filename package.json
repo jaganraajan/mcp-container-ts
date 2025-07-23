@@ -1,12 +1,14 @@
 {
   "name": "mcp-container-ts",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./build/index.js",
   "type": "module",
   "scripts": {
-    "start": "tsx src/index.ts",
+    "start": "NODE_ENV='production' tsx src/index.ts",
+    "host": "NODE_ENV='development' tsx --watch src/host.ts",
+    "generate-token": "tsx src/auth/generate-token.ts",
     "build": "tsc",
-    "dev": "tsx watch src/index.ts",
+    "dev": "NODE_ENV='development' tsx watch src/index.ts",
     "inspect": "mcp-inspector --config ./mcp-inspector.json --server mcp-server"
   },
   "keywords": [
@@ -15,25 +17,40 @@
     "mcp-server",
     "streamable-http",
     "sqlite",
-    "express"    
+    "express",
+    "typescript",
+    "authentication",
+    "authorization",
+    "jwt"
   ],
   "license": "MIT",
-  "description": "An MCP server that implements Streamable HTTP and communicates with a local sqlite database.",
+  "description": "An MCP server that implements Authentication and Authorization with Streamable HTTP and communicates with a local sqlite database.",
   "dependencies": {
     "@azure/identity": "^4.9.1",
     "@modelcontextprotocol/sdk": "^1.15.0",
     "better-sqlite3": "^11.9.1",
     "chalk": "^5.4.1",
+    "connect-timeout": "^1.9.0",
+    "cors": "^2.8.5",
     "debug": "^4.4.0",
+    "dotenv": "^17.2.0",
     "express": "^5.0.1",
+    "express-rate-limit": "^8.0.1",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "openai": "^5.8.3",
     "type": "^2.7.3",
     "zod": "^3.24.3"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.15.0",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/connect-timeout": "^1.9.0",
+    "@types/cors": "^2.8.19",
     "@types/debug": "^4.1.12",
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.11.24",
     "tsx": "^4.19.3",
     "typescript": "^5.3.3"

@@ -1,5 +1,11 @@
+import { z } from 'zod';
 import Database from "better-sqlite3";
 import { logger } from "./helpers/logs.js";
+
+const TodoSchema = z.object({
+  title: z.string().min(1).max(255).regex(/^[a-zA-Z0-9\s\-_.,!?]+$/),
+  id: z.number().positive().int()
+});
 
 const log = logger("db");
 const DB_NAME = "todos";
@@ -23,12 +29,15 @@ try {
 
 export async function addTodo(text: string) {
   log.info(`Adding TODO: ${text}`);
+  const validatedInput = TodoSchema.parse({ title: text });
+
   const stmt = db.prepare(`INSERT INTO todos (text, completed) VALUES (?, 0)`);
-  return stmt.run(text);
+  return stmt.run(validatedInput.title);
 }
 
 export async function listTodos() {
   log.info("Listing all TODOs...");
+
   const todos = db.prepare(`SELECT id, text, completed FROM todos`).all() as Array<{
     id: number;
     text: string;
@@ -42,18 +51,27 @@ export async function listTodos() {
 
 export async function completeTodo(id: number) {
   log.info(`Completing TODO with ID: ${id}`);
+
+  const validatedInput = z.number().positive().int().parse(id);
+
   const stmt = db.prepare(`UPDATE todos SET completed = 1 WHERE id = ?`);
-  return stmt.run(id);
+  return stmt.run(validatedInput);
 }
 
 export async function updateTodoText(id: number, text: string) {
   log.info(`Updating TODO with ID: ${id}`);
+
+  const validatedInput = TodoSchema.parse({ title: text, id });
+
   const stmt = db.prepare(`UPDATE todos SET text = ? WHERE id = ?`);
-  return stmt.run(text, id);
+  return stmt.run(validatedInput.title, validatedInput.id);
 }
 
 export async function deleteTodo(id: number) {
   log.info(`Deleting TODO with ID: ${id}`);
+
+  const validatedInput = z.number().positive().int().parse(id);
+
   const row = db.prepare(`SELECT text FROM todos WHERE id = ?`).get(id) as
     | { text: string }
     | undefined;
@@ -61,7 +79,7 @@ export async function deleteTodo(id: number) {
     log.error(`TODO with ID ${id} not found`);
     return null;
   }
-  db.prepare(`DELETE FROM todos WHERE id = ?`).run(id);
-  log.success(`TODO with ID ${id} deleted`);
+  db.prepare(`DELETE FROM todos WHERE id = ?`).run(validatedInput);
+  log.success(`TODO with ID ${validatedInput} deleted`);
   return row;
 }
