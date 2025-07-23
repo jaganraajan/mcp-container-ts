@@ -128,7 +128,18 @@ cd mcp-container-ts
 npm install
 ```
 
-3. Start the dev server
+3. Generate a new JWT configuration:
+
+```bash
+npm run generate-token
+```
+
+This will append (or create) a new JWT configuration to `.env` file at the root of the project. The generated token will be used to authenticate requests to the MCP server.
+
+> [!NOTE]
+> In a production environment, you should use a more secure method to manage your secrets and tokens.
+
+4. Start the dev server
 
 ```bash
 npm run dev
@@ -137,9 +148,16 @@ npm run dev
 You should see the following output in the terminal:
 
 ```bash
-  mcp:index 2025-07-08T13:35:08.986Z MCP Stateless Streamable HTTP Server
-  mcp:index 2025-07-08T13:35:08.986Z MCP endpoint: http://localhost:3000/mcp
-  mcp:index 2025-07-08T13:35:08.986Z Press Ctrl+C to stop the server
+  mcp:db 2025-07-23T16:48:05.381Z PRAGMA journal_mode = WAL +0ms
+  mcp:db 2025-07-23T16:48:05.382Z CREATE TABLE IF NOT EXISTS todos (
+  mcp:db      id INTEGER PRIMARY KEY AUTOINCREMENT,
+  mcp:db      text TEXT NOT NULL,
+  mcp:db      completed INTEGER NOT NULL DEFAULT 0
+  mcp:db    ) +0ms
+  mcp:db 2025-07-23T16:48:05.382Z Database "todos" initialized. +0ms
+  mcp:index 2025-07-23T16:48:05.449Z MCP Stateless Streamable HTTP Server +0ms
+  mcp:index 2025-07-23T16:48:05.449Z MCP endpoint: http://localhost:3000/mcp +0ms
+  mcp:index 2025-07-23T16:48:05.449Z Press Ctrl+C to stop the server +0ms
 ```
 
 4. To access and use the MCP server, read the [Test your MCP server with desktop MCP Clients](#test-your-mcp-server-with-desktop-mcp-clients) section below.
