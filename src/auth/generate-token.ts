@@ -34,5 +34,5 @@ JWT_ISSUER="${JWT_ISSUER}"
 JWT_EXPIRY="${JWT_EXPIRY}"
 JWT_SECRET="${JWT_SECRET}"
 JWT_TOKEN="${token}"`,
-  { flag: "w" }
+  { flag: "a" }
 );
