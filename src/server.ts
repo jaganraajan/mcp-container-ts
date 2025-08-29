@@ -165,6 +165,9 @@ export class StreamableHTTPServer {
       }
 
       try {
+
+        log.info(`Executing tool ${toolName} with arguments:`, args);
+
         const result = await tool.execute(args as any);
         log.success(
           `User ${user.id} successfully executed tool ${toolName}. Result:`,

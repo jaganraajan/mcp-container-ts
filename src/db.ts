@@ -4,7 +4,7 @@ import { logger } from "./helpers/logs.js";
 
 const TodoSchema = z.object({
   title: z.string().min(1).max(255).regex(/^[a-zA-Z0-9\s\-_.,!?]+$/),
-  id: z.number().positive().int()
+  id: z.number().positive().int().optional(),
 });
 
 const log = logger("db");
