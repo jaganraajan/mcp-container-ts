@@ -4,11 +4,11 @@
   "main": "./build/index.js",
   "type": "module",
   "scripts": {
-    "start": "NODE_ENV='production' tsx src/index.ts",
-    "host": "NODE_ENV='development' tsx --watch src/host.ts",
+    "start": "cross-env NODE_ENV='production' tsx src/index.ts",
+    "host": "cross-env NODE_ENV='development' tsx --watch src/host.ts",
     "generate-token": "tsx src/auth/generate-token.ts",
     "build": "tsc",
-    "dev": "NODE_ENV='development' tsx watch src/index.ts",
+    "dev": "cross-env NODE_ENV='development' tsx watch src/index.ts",
     "inspect": "mcp-inspector --config ./mcp-inspector.json --server mcp-server"
   },
   "keywords": [
@@ -32,6 +32,7 @@
     "chalk": "^5.4.1",
     "connect-timeout": "^1.9.0",
     "cors": "^2.8.5",
+    "cross-env": "^10.0.0",
     "debug": "^4.4.0",
     "dotenv": "^17.2.0",
     "express": "^5.0.1",
@@ -41,7 +42,8 @@
     "jsonwebtoken": "^9.0.2",
     "openai": "^5.8.3",
     "type": "^2.7.3",
-    "zod": "^3.24.3"
+    "zod": "^3.24.3",
+    "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.15.0",

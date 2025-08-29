@@ -286,7 +286,7 @@ The quickest way to connect to the MCP server is the use the provided `.vscode/m
 
 Once you have this file opened, you can click on the "start" inlined action button that will connect the MCP server and fetch the available tools.
 
-**IMPORTANT:** Because the server is secured with a token, you will be prompted by VS Code to enter the token. The demo token we are using is `abc`.
+**IMPORTANT:** Because the server is secured with a JWT token, you will be prompted by VS Code to enter the token. You need to copy the value of the `"JWT_TOKEN"` from the `.env` file created by the `npm run generate-token` command.
 
 > [!NOTE]
 > In a real world scenario, you would want to validate the token and use a more secure method of authentication. This is just a demo token for testing purposes. Learn more about to secure your server [here](https://learn.microsoft.com/entra/identity-platform/authentication-vs-authorization).
@@ -329,7 +329,7 @@ npm run inspect
 
 1. CTRL click to load the MCP Inspector web app from the URL displayed in the terminal (e.g. http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=xyz)
 2. Set the transport type to `Streamable HTTP`.
-3. Add authentication header: `Authorization` and Bearer token: `abc`.
+3. Add authentication header: `Authorization` and Bearer token which is the value of the `"JWT_TOKEN"` from the `.env` file created by the `npm run generate-token` command.
 4. Set the URL to your running server's HTTP endpoint and Connect:
 ```bash
 # for local development, use:

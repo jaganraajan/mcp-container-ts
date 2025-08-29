@@ -1,3 +1,5 @@
+import { zodToJsonSchema } from "zod-to-json-schema";
+import { z } from "zod";
 import {
   addTodo,
   listTodos,
@@ -6,28 +8,38 @@ import {
   updateTodoText,
 } from "./db.js";
 
+// Zod schemas for input validation
+const AddTodoInputSchema = z.object({
+  title: z.string(),
+});
+
+const CompleteTodoInputSchema = z.object({
+  id: z.number(),
+});
+
+const DeleteTodoInputSchema = z.object({
+  id: z.number(),
+});
+
+const UpdateTodoInputSchema = z.object({
+  id: z.number(),
+  text: z.string(),
+});
+
+const ListTodosInputSchema = z.object({});
+
+// Common output schema
+const ToolOutputSchema = z.object({
+  content: z.array(z.string()),
+});
+
 export const TodoTools = [
   {
     name: "add_todo",
     description:
       "Add a new TODO item to the list. Provide a title for the task you want to add. Returns a confirmation message with the new TODO id.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        title: { type: "string" },
-      },
-      required: ["title"],
-    },
-    outputSchema: {
-      type: "object",
-      properties: {
-        content: {
-          type: "array",
-          items: { type: "string" },
-        },
-      },
-      required: ["content"],
-    },
+    inputSchema: zodToJsonSchema(AddTodoInputSchema),
+    outputSchema: zodToJsonSchema(ToolOutputSchema),
     async execute({ title }: { title: string }) {
       const info = await addTodo(title);
       return {
@@ -41,21 +53,8 @@ export const TodoTools = [
     name: "list_todos",
     description:
       "List all TODO items. Returns a formatted list of all tasks with their ids, titles, and completion status.",
-    inputSchema: {
-      type: "object",
-      properties: {},
-      required: [],
-    },
-    outputSchema: {
-      type: "object",
-      properties: {
-        content: {
-          type: "array",
-          items: { type: "string" },
-        },
-      },
-      required: ["content"],
-    },
+    inputSchema: zodToJsonSchema(ListTodosInputSchema),
+    outputSchema: zodToJsonSchema(ToolOutputSchema),
     async execute() {
       const tools = await listTodos();
       if (!tools || tools.length === 0) {
@@ -72,23 +71,8 @@ export const TodoTools = [
     name: "complete_todo",
     description:
       "Mark a TODO item as completed. Provide the id of the task to mark as done. Returns a confirmation message or an error if the id does not exist.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        id: { type: "number" },
-      },
-      required: ["id"],
-    },
-    outputSchema: {
-      type: "object",
-      properties: {
-        content: {
-          type: "array",
-          items: { type: "string" },
-        },
-      },
-      required: ["content"],
-    },
+    inputSchema: zodToJsonSchema(CompleteTodoInputSchema),
+    outputSchema: zodToJsonSchema(ToolOutputSchema),
     async execute({ id }: { id: number }) {
       const info = await completeTodo(id);
       if (info.changes === 0) {
@@ -109,23 +93,8 @@ export const TodoTools = [
     name: "delete_todo",
     description:
       "Delete a TODO item from the list. Provide the id of the task to delete. Returns a confirmation message or an error if the id does not exist.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        id: { type: "number" },
-      },
-      required: ["id"],
-    },
-    outputSchema: {
-      type: "object",
-      properties: {
-        content: {
-          type: "array",
-          items: { type: "string" },
-        },
-      },
-      required: ["content"],
-    },
+    inputSchema: zodToJsonSchema(DeleteTodoInputSchema),
+    outputSchema: zodToJsonSchema(ToolOutputSchema),
     async execute({ id }: { id: number }) {
       const row = await deleteTodo(id);
       if (!row) {
@@ -145,19 +114,8 @@ export const TodoTools = [
   {
     name: "updateTodoText",
     description: "Update the text of a todo",
-    inputSchema: {
-      type: "object",
-      properties: {
-        id: { type: "number" },
-        text: { type: "string" },
-      },
-      required: ["id"],
-    },
-    outputSchema: {
-      type: "object",
-      properties: { content: { type: "array", items: { type: "string" } } },
-      required: ["content"],
-    },
+    inputSchema: zodToJsonSchema(UpdateTodoInputSchema),
+    outputSchema: zodToJsonSchema(ToolOutputSchema),
     async execute({ id, text }: { id: number; text: string }) {
       const row = await updateTodoText(id, text);
       if (!row) {

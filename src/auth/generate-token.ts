@@ -10,15 +10,20 @@ console.warn(
 import { writeFileSync } from "fs";
 import { randomBytes } from "crypto";
 import jwt from "jsonwebtoken";
+import { getUserPermissions, UserRole } from "./authorization";
 
 // define dummy values for JWT_SECRET, JWT_EXPIRY, and PAYLOAD
 const JWT_SECRET = randomBytes(32).toString('base64');
 const JWT_EXPIRY = "1h";
-const JWT_AUDIENCE = "mcp-client";
-const JWT_ISSUER = "mcp-server";
+const JWT_AUDIENCE = "urn:foo";
+const JWT_ISSUER = "urn:bar";
 const PAYLOAD = {
   issuer: JWT_ISSUER,
   audience: JWT_AUDIENCE,
+  id: "user-id-123",
+  email: "user@example.com",
+  role: UserRole.ADMIN,
+  permissions: getUserPermissions(UserRole.ADMIN)
 };
 
 const token = jwt.sign(PAYLOAD, JWT_SECRET, {

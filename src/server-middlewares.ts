@@ -4,9 +4,7 @@ import cors from "cors";
 import { body, validationResult } from "express-validator";
 import rateLimit from "express-rate-limit";
 import express, { NextFunction, Request, Response } from "express";
-import { logger } from "./helpers/logs";
 import { authenticateJWT } from "./auth/jwt.js";
-const log = logger("middleware");
 
 // Middleware to limite the number of requests from a single IP address
 const rateLimiterMiddleware = rateLimit({
@@ -64,10 +62,12 @@ const urlencodedMiddleware = express.urlencoded({
 });
 
 // Middleware to handle request timeouts
-const timeoutMiddleware = [timeout("30s"),
-(req: Request, res: Response, next: NextFunction) => {
-  if (!req.timedout) next();
-}];
+const timeoutMiddleware = [
+  timeout("30s"),
+  (req: Request, res: Response, next: NextFunction) => {
+    if (!req.timedout) next();
+  },
+];
 
 // Middleware to validate JSON-RPC requests
 const validationMiddleware = [
@@ -77,14 +77,15 @@ const validationMiddleware = [
   body("id").optional().isString(),
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      error: "Validation failed",
-      details: errors.array(),
-    });
-  }
-  next();
-}];
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: errors.array(),
+      });
+    }
+    next();
+  },
+];
 
 export const securityMiddlewares = [
   authenticateJWT,
@@ -94,5 +95,7 @@ export const securityMiddlewares = [
   jsonMiddleware,
   urlencodedMiddleware,
   ...timeoutMiddleware,
-  ...validationMiddleware,
+
+  // Optional:
+  // ...validationMiddleware,
 ];

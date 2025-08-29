@@ -1,36 +1,19 @@
 import "dotenv/config";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import express, { Request, Response } from "express";
 import { StreamableHTTPServer } from "./server.js";
 import { logger } from "./helpers/logs.js";
 import { securityMiddlewares } from "./server-middlewares.js";
 const log = logger("index");
 
-const server = new StreamableHTTPServer(
-  new Server(
-    {
-      name: "todo-http-server",
-      version: "1.0.0",
-    },
-    {
-      capabilities: {
-        tools: {},
-      },
-    }
-  )
-);
+const server = new StreamableHTTPServer();
 
 const MCP_ENDPOINT = "/mcp";
 const app = express();
 const router = express.Router();
 app.use(MCP_ENDPOINT, securityMiddlewares);
 
-router.post(MCP_ENDPOINT, async (req: Request, res: Response) => {
-  await server.handlePostRequest(req, res);
-});
-
-router.get(MCP_ENDPOINT, async (req: Request, res: Response) => {
-  await server.handleGetRequest(req, res);
+router.all(MCP_ENDPOINT, async (req: Request, res: Response) => {
+  await server.handleStreamableHTTP(req, res);
 });
 
 app.use("/", router);
