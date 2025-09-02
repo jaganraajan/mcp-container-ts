@@ -90,7 +90,7 @@ export async function deleteTaskPostgres(id: number) {
 
 export const TodoTools = [
   {
-    name: "add_task",
+    name: "add_todo",
     description:
       "Add a new task to the list. Provide title, description, due_date (ISO), priority, and status. Returns a confirmation message with the new task id.",
     inputSchema: zodToJsonSchema(AddTaskInputSchema),
@@ -117,7 +117,7 @@ export const TodoTools = [
     },
   },
   {
-    name: "list_tasks",
+    name: "list_todos",
     description:
       "List all tasks. Returns a formatted list of all tasks with their details.",
     inputSchema: zodToJsonSchema(ListTasksInputSchema),
@@ -135,7 +135,7 @@ export const TodoTools = [
     },
   },
   {
-    name: "update_task",
+    name: "update_todo",
     description: "Update a task's fields by id. Provide any fields to update.",
     inputSchema: zodToJsonSchema(UpdateTaskInputSchema),
     outputSchema: zodToJsonSchema(ToolOutputSchema),
@@ -162,7 +162,7 @@ export const TodoTools = [
     },
   },
   {
-    name: "delete_task",
+    name: "delete_todo",
     description: "Delete a task by id.",
     inputSchema: zodToJsonSchema(TaskIdInputSchema),
     outputSchema: zodToJsonSchema(ToolOutputSchema),
