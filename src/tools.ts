@@ -7,6 +7,7 @@ import {
   deleteTodo,
   updateTodoText,
 } from "./db.js";
+import { Pool } from "pg";
 
 // Zod schemas for input validation
 const AddTodoInputSchema = z.object({
@@ -33,6 +34,18 @@ const ToolOutputSchema = z.object({
   content: z.array(z.string()),
 });
 
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_CONNECTION_STRING,
+});
+
+export async function addTodoPostgres(text: string) {
+  const result = await pool.query(
+    "INSERT INTO tasks (text) VALUES ($1) RETURNING id",
+    [text]
+  );
+  return { id: result.rows[0].id };
+}
+
 export const TodoTools = [
   {
     name: "add_todo",
@@ -42,9 +55,11 @@ export const TodoTools = [
     outputSchema: zodToJsonSchema(ToolOutputSchema),
     async execute({ title }: { title: string }) {
       const info = await addTodo(title);
+      const infoPostgres = await addTodoPostgres(title);
       return {
         content: [
-          `Added TODO: ${title} (id: ${info.lastInsertRowid})`
+          `Added TODO: ${title} (id: ${info.lastInsertRowid})`,
+          `Added TODO to Postgres: ${title} (id: ${infoPostgres.id})`
         ],
       };
     },
