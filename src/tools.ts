@@ -1,33 +1,30 @@
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { z } from "zod";
-import {
-  addTodo,
-  listTodos,
-  completeTodo,
-  deleteTodo,
-  updateTodoText,
-} from "./db.js";
 import { Pool } from "pg";
 
 // Zod schemas for input validation
-const AddTodoInputSchema = z.object({
+const AddTaskInputSchema = z.object({
   title: z.string(),
+  description: z.string(),
+  due_date: z.string(), // ISO string
+  priority: z.string(),
+  status: z.string(),
 });
 
-const CompleteTodoInputSchema = z.object({
+const UpdateTaskInputSchema = z.object({
+  id: z.number(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  due_date: z.string().optional(),
+  priority: z.string().optional(),
+  status: z.string().optional(),
+});
+
+const TaskIdInputSchema = z.object({
   id: z.number(),
 });
 
-const DeleteTodoInputSchema = z.object({
-  id: z.number(),
-});
-
-const UpdateTodoInputSchema = z.object({
-  id: z.number(),
-  text: z.string(),
-});
-
-const ListTodosInputSchema = z.object({});
+const ListTasksInputSchema = z.object({});
 
 // Common output schema
 const ToolOutputSchema = z.object({
@@ -38,113 +35,143 @@ const pool = new Pool({
   connectionString: process.env.POSTGRES_CONNECTION_STRING,
 });
 
-export async function addTodoPostgres(text: string) {
+export async function addTaskPostgres({ title, description, due_date, priority, status }: {
+  title: string;
+  description: string;
+  due_date: string;
+  priority: string;
+  status: string;
+}) {
   const result = await pool.query(
-    "INSERT INTO tasks (text) VALUES ($1) RETURNING id",
-    [text]
+    `INSERT INTO tasks (title, description, due_date, priority, status)
+     VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+    [title, description, due_date, priority, status]
   );
   return { id: result.rows[0].id };
 }
 
+export async function listTasksPostgres() {
+  const result = await pool.query(
+    `SELECT id, title, description, due_date, priority, status FROM tasks ORDER BY due_date ASC`
+  );
+  return result.rows;
+}
+
+export async function updateTaskPostgres({ id, title, description, due_date, priority, status }: {
+  id: number;
+  title?: string;
+  description?: string;
+  due_date?: string;
+  priority?: string;
+  status?: string;
+}) {
+  // Build dynamic update query
+  const fields = [];
+  const values = [];
+  let idx = 1;
+  if (title !== undefined) { fields.push(`title = $${idx++}`); values.push(title); }
+  if (description !== undefined) { fields.push(`description = $${idx++}`); values.push(description); }
+  if (due_date !== undefined) { fields.push(`due_date = $${idx++}`); values.push(due_date); }
+  if (priority !== undefined) { fields.push(`priority = $${idx++}`); values.push(priority); }
+  if (status !== undefined) { fields.push(`status = $${idx++}`); values.push(status); }
+  if (fields.length === 0) return { changes: 0 };
+  values.push(id);
+  const query = `UPDATE tasks SET ${fields.join(", ")} WHERE id = $${idx} RETURNING *`;
+  const result = await pool.query(query, values);
+  return { changes: result.rowCount, row: result.rows[0] };
+}
+
+export async function deleteTaskPostgres(id: number) {
+  const row = await pool.query(`SELECT * FROM tasks WHERE id = $1`, [id]);
+  if (row.rows.length === 0) return null;
+  await pool.query(`DELETE FROM tasks WHERE id = $1`, [id]);
+  return row.rows[0];
+}
+
 export const TodoTools = [
   {
-    name: "add_todo",
+    name: "add_task",
     description:
-      "Add a new TODO item to the list. Provide a title for the task you want to add. Returns a confirmation message with the new TODO id.",
-    inputSchema: zodToJsonSchema(AddTodoInputSchema),
+      "Add a new task to the list. Provide title, description, due_date (ISO), priority, and status. Returns a confirmation message with the new task id.",
+    inputSchema: zodToJsonSchema(AddTaskInputSchema),
     outputSchema: zodToJsonSchema(ToolOutputSchema),
-    async execute({ title }: { title: string }) {
-      const info = await addTodo(title);
-      const infoPostgres = await addTodoPostgres(title);
+    async execute({
+      title,
+      description,
+      due_date,
+      priority,
+      status,
+    }: {
+      title: string;
+      description: string;
+      due_date: string;
+      priority: string;
+      status: string;
+    }) {
+      const info = await addTaskPostgres({ title, description, due_date, priority, status });
       return {
         content: [
-          `Added TODO: ${title} (id: ${info.lastInsertRowid})`,
-          `Added TODO to Postgres: ${title} (id: ${infoPostgres.id})`
+          `Added task: ${title} (id: ${info.id})`
         ],
       };
     },
   },
   {
-    name: "list_todos",
+    name: "list_tasks",
     description:
-      "List all TODO items. Returns a formatted list of all tasks with their ids, titles, and completion status.",
-    inputSchema: zodToJsonSchema(ListTodosInputSchema),
+      "List all tasks. Returns a formatted list of all tasks with their details.",
+    inputSchema: zodToJsonSchema(ListTasksInputSchema),
     outputSchema: zodToJsonSchema(ToolOutputSchema),
     async execute() {
-      const tools = await listTodos();
-      if (!tools || tools.length === 0) {
-        return { content: ["No TODOs found."] };
+      const tasks = await listTasksPostgres();
+      if (!tasks || tasks.length === 0) {
+        return { content: ["No tasks found."] };
       }
       return {
-        content: tools.map(
-          (t) => `TODO: ${t.text} (id: ${t.id})${t.completed ? " [completed]" : ""}`
+        content: tasks.map(
+          (t) => `Task: ${t.title} (id: ${t.id})\nDescription: ${t.description}\nDue: ${t.due_date}\nPriority: ${t.priority}\nStatus: ${t.status}`
         ),
       };
     },
   },
   {
-    name: "complete_todo",
-    description:
-      "Mark a TODO item as completed. Provide the id of the task to mark as done. Returns a confirmation message or an error if the id does not exist.",
-    inputSchema: zodToJsonSchema(CompleteTodoInputSchema),
+    name: "update_task",
+    description: "Update a task's fields by id. Provide any fields to update.",
+    inputSchema: zodToJsonSchema(UpdateTaskInputSchema),
     outputSchema: zodToJsonSchema(ToolOutputSchema),
-    async execute({ id }: { id: number }) {
-      const info = await completeTodo(id);
-      if (info.changes === 0) {
-        return {
-          content: [
-            `TODO with id ${id} not found.`
-          ],
-        };
+    async execute({
+      id,
+      title,
+      description,
+      due_date,
+      priority,
+      status,
+    }: {
+      id: number;
+      title?: string;
+      description?: string;
+      due_date?: string;
+      priority?: string;
+      status?: string;
+    }) {
+      const result = await updateTaskPostgres({ id, title, description, due_date, priority, status });
+      if (result.changes === 0) {
+        return { content: [ `Task with id ${id} not found or no changes.` ] };
       }
-      return {
-        content: [
-          `TODO with id ${id} marked as completed.`
-        ],
-      };
+      return { content: [ `Updated task with id ${id}.` ] };
     },
   },
   {
-    name: "delete_todo",
-    description:
-      "Delete a TODO item from the list. Provide the id of the task to delete. Returns a confirmation message or an error if the id does not exist.",
-    inputSchema: zodToJsonSchema(DeleteTodoInputSchema),
+    name: "delete_task",
+    description: "Delete a task by id.",
+    inputSchema: zodToJsonSchema(TaskIdInputSchema),
     outputSchema: zodToJsonSchema(ToolOutputSchema),
     async execute({ id }: { id: number }) {
-      const row = await deleteTodo(id);
+      const row = await deleteTaskPostgres(id);
       if (!row) {
-        return {
-          content: [
-            `TODO with id ${id} not found.`
-          ],
-        };
+        return { content: [ `Task with id ${id} not found.` ] };
       }
-      return {
-        content: [
-          `Deleted TODO: ${row.text} (id: ${id})`
-        ],
-      };
-    },
-  },
-  {
-    name: "updateTodoText",
-    description: "Update the text of a todo",
-    inputSchema: zodToJsonSchema(UpdateTodoInputSchema),
-    outputSchema: zodToJsonSchema(ToolOutputSchema),
-    async execute({ id, text }: { id: number; text: string }) {
-      const row = await updateTodoText(id, text);
-      if (!row) {
-        return {
-          content: [
-            `TODO with id ${id} not found.`
-          ],
-        };
-      }
-      return {
-        content: [
-          `Updated text for todo with id ${id} to "${text}"`
-        ],
-      };
+      return { content: [ `Deleted task: ${row.title} (id: ${id})` ] };
     },
   },
 ];
