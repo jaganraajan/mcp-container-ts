@@ -28,7 +28,10 @@ const ListTasksInputSchema = z.object({});
 
 // Common output schema
 const ToolOutputSchema = z.object({
-  content: z.array(z.string()),
+  content: z.array(z.object({
+    type: z.literal("text"),
+    text: z.string(),
+  })),
 });
 
 const pool = new Pool({
@@ -111,7 +114,7 @@ export const TodoTools = [
       const info = await addTaskPostgres({ title, description, due_date, priority, status });
       return {
         content: [
-          `Added task: ${title} (id: ${info.id})`
+          { type: "text", text: `Added task: ${title} (id: ${info.id})` }
         ],
       };
     },
@@ -125,11 +128,14 @@ export const TodoTools = [
     async execute() {
       const tasks = await listTasksPostgres();
       if (!tasks || tasks.length === 0) {
-        return { content: ["No tasks found."] };
+        return { content: [ { type: "text", text: "No tasks found." } ] };
       }
       return {
         content: tasks.map(
-          (t) => `Task: ${t.title} (id: ${t.id})\nDescription: ${t.description}\nDue: ${t.due_date}\nPriority: ${t.priority}\nStatus: ${t.status}`
+          (t) => ({
+            type: "text",
+            text: `Task: ${t.title} (id: ${t.id})\nDescription: ${t.description}\nDue: ${t.due_date}\nPriority: ${t.priority}\nStatus: ${t.status}`
+          })
         ),
       };
     },
@@ -156,9 +162,9 @@ export const TodoTools = [
     }) {
       const result = await updateTaskPostgres({ id, title, description, due_date, priority, status });
       if (result.changes === 0) {
-        return { content: [ `Task with id ${id} not found or no changes.` ] };
+        return { content: [ { type: "text", text: `Task with id ${id} not found or no changes.` } ] };
       }
-      return { content: [ `Updated task with id ${id}.` ] };
+      return { content: [ { type: "text", text: `Updated task with id ${id}.` } ] };
     },
   },
   {
@@ -169,9 +175,9 @@ export const TodoTools = [
     async execute({ id }: { id: number }) {
       const row = await deleteTaskPostgres(id);
       if (!row) {
-        return { content: [ `Task with id ${id} not found.` ] };
+        return { content: [ { type: "text", text: `Task with id ${id} not found.` } ] };
       }
-      return { content: [ `Deleted task: ${row.title} (id: ${id})` ] };
+      return { content: [ { type: "text", text: `Deleted task: ${row.title} (id: ${id})` } ] };
     },
   },
 ];
